@@ -28,7 +28,8 @@ I2C 只有 SCL、SDA 两根线，都是开漏输出，高电平靠外部上拉�
 
 时序三条铁律：起始是 SCL 高时 SDA 由高变低，停止是 SCL 高时 SDA 由低变高，数据在 SCL 高电平期间必须稳定。每发完 8 位，接收方在第 9 个时钟拉低 SDA 表示应答。
 
-![](STM32F103 I2C OLED 显示实验 —— 汉字点阵、AHT20 温湿度与 U8g2 移植.assets/i2c-17927466893321.jpeg)
+<img width="448" height="249" alt="i2c-17927466893321" src="https://github.com/user-attachments/assets/fdf830db-d688-494a-9836-d1a7e42121bc" />
+
 
 一次写显存的事务是：`START + 地址字节 + ACK + 控制字节 + ACK + 数据 + ACK + … + STOP`。速率有标准模式 100 kHz 和快速模式 400 kHz，任务一软件模拟，任务三硬件 I2C 配成 400 kHz。
 
@@ -36,7 +37,9 @@ I2C 只有 SCL、SDA 两根线，都是开漏输出，高电平靠外部上拉�
 
 SSD1306 显存切成 **8 页**，每页 8 行、128 列，一列 8 个像素打包成 1 字节，整屏正好 1 KB。这个按列存储的结构，正是 16×16 汉字占 2 页、32 字节的原因，也是取模方向一错字就散架的根源。
 
-![](STM32F103 I2C OLED 显示实验 —— 汉字点阵、AHT20 温湿度与 U8g2 移植.assets/ssd.jpeg)
+
+<img width="448" height="271" alt="ssd" src="https://github.com/user-attachments/assets/2b97c143-5661-40dc-ba97-21d36ac0ae41" />
+
 
 I2C 传输的第一字节是控制字节：`0x00` 后面是命令，`0x40` 后面是显存数据。手写驱动用页寻址，和"汉字占 2 页"天然匹配。为避免滚动撕裂，两个工程都用影子显存加整帧刷新，且只刷新有内容的那几页。
 
@@ -44,7 +47,9 @@ I2C 传输的第一字节是控制字节：`0x00` 后面是命令，`0x40` 后�
 
 16×16 点阵一个汉字 32 字节，bit=1 点亮。PCtoLCD2002 的关键设置是：**阴码、列行式、逆向、C51 格式**，正好对应 SSD1306 的显存结构，设置错了字就会翻转、镜像或变成乱码条纹。
 
-![ad6e3333ff23d7a8ff01f924837ee356](STM32F103 I2C OLED 显示实验 —— 汉字点阵、AHT20 温湿度与 U8g2 移植.assets/ad6e3333ff23d7a8ff01f924837ee356.jpg)
+
+<img width="779" height="620" alt="ad6e3333ff23d7a8ff01f924837ee356" src="https://github.com/user-attachments/assets/6ecefab9-70d9-4ec6-921c-d9710ec6d898" />
+
 
 ### 4. U8g2 的分层与缓冲
 
@@ -345,7 +350,12 @@ static void ScrollPageSoft(void)
 
 ### 5.上板效果
 
-<img src="STM32F103 I2C OLED 显示实验 —— 汉字点阵、AHT20 温湿度与 U8g2 移植.assets/e2a552e369e857da4b65249b975fda47.jpg" alt="e2a552e369e857da4b65249b975fda47" style="zoom: 33%;" />
+
+
+
+https://github.com/user-attachments/assets/5e92cb8f-09cb-4824-8eea-bee059f4f200
+
+
 
 ## 四、任务三：CubeMX + U8g2
 
@@ -353,21 +363,25 @@ static void ScrollPageSoft(void)
 
 用 CubeMX 6.14 新建工程，芯片选 `STM32F103C8Tx`
 
-![image-20261023234418298](STM32F103 I2C OLED 显示实验 —— 汉字点阵、AHT20 温湿度与 U8g2 移植.assets/image-20261023234418298.png)
+<img width="446" height="192" alt="image-20261023234418298" src="https://github.com/user-attachments/assets/53354f98-854b-4074-815b-ed3f1f860e06" />
+
 
 RCC 用外部 8 MHz 晶振，SYS 开 Serial Wire
 
-![image-20261023234616276](STM32F103 I2C OLED 显示实验 —— 汉字点阵、AHT20 温湿度与 U8g2 移植.assets/image-20261023234616276.png)
+<img width="722" height="556" alt="image-20261023234616276" src="https://github.com/user-attachments/assets/45256d3a-89bb-4a8a-a8d0-f5582b04efa1" />
+
 
 时钟树 PLL ×9 到 72 MHz（APB1 36 MHz、APB2 72 MHz），**I2C1 配成 Fast Mode 400 kHz（PB6/PB7）**
 
-![image-20261023234817360](STM32F103 I2C OLED 显示实验 —— 汉字点阵、AHT20 温湿度与 U8g2 移植.assets/image-20261023234817360.png)
+<img width="1218" height="518" alt="image-20261023234817360" src="https://github.com/user-attachments/assets/78524db9-d89b-40b7-b93a-bdf460f3d374" />
+<img width="702" height="588" alt="image-20261023234748901" src="https://github.com/user-attachments/assets/4d87f31b-c6b8-4706-8f94-d58f12666aac" />
 
-![image-20261023234748901](STM32F103 I2C OLED 显示实验 —— 汉字点阵、AHT20 温湿度与 U8g2 移植.assets/image-20261023234748901.png)
+
 
 PC13 配成 GPIO_Output 。
 
-![image-20261023234916264](STM32F103 I2C OLED 显示实验 —— 汉字点阵、AHT20 温湿度与 U8g2 移植.assets/image-20261023234916264.png)
+<img width="406" height="360" alt="image-20261023234916264" src="https://github.com/user-attachments/assets/6c1f6e81-83e0-4595-8c60-35c0e27afce8" />
+
 
 生成后在 `main()` 里只加两行，主循环里只调一个 `UI_Task()`：
 
@@ -515,9 +529,9 @@ static void draw_info(void)
 }
 ```
 
-![image-20261024163433705](STM32F103 I2C OLED 显示实验 —— 汉字点阵、AHT20 温湿度与 U8g2 移植.assets/image-20261024163433705.png)
+<img width="1434" height="854" alt="image-20261024163433705" src="https://github.com/user-attachments/assets/0dfdb14d-fd84-405a-8c62-b5fb6dcd1995" />
 
-![image-20261024163447984](STM32F103 I2C OLED 显示实验 —— 汉字点阵、AHT20 温湿度与 U8g2 移植.assets/image-20261024163447984.png)
+<img width="320" height="154" alt="image-20261024163447984" src="https://github.com/user-attachments/assets/4ebd277c-9079-4f5d-8764-421651698f33" />
 
 **③ 上下、左右滑动。**都用裁剪窗口加时间戳算坐标，9 秒和 8 秒一轮。`CN_DrawStrAt()` 用带符号的 int16_t 坐标，因为 `u8g2_DrawXBMP()` 的参数是无符号类型，负数会被当成巨大的正数。
 
@@ -597,25 +611,8 @@ void UI_Task(void)
 
 **上板效果**
 
-U8G2的demo例程
 
-<img src="STM32F103 I2C OLED 显示实验 —— 汉字点阵、AHT20 温湿度与 U8g2 移植.assets/3f14eac47595f83632ba33fade709647.jpg" alt="3f14eac47595f83632ba33fade709647" style="zoom:50%;" />
-
-<img src="STM32F103 I2C OLED 显示实验 —— 汉字点阵、AHT20 温湿度与 U8g2 移植.assets/511f031aa3df7c139bf0ea81929d991c.jpg" alt="511f031aa3df7c139bf0ea81929d991c" style="zoom:50%;" />
-
-学号姓名显示
-
-<img src="STM32F103 I2C OLED 显示实验 —— 汉字点阵、AHT20 温湿度与 U8g2 移植.assets/443dccdc19c73620356685c70e1fd433.jpg" alt="443dccdc19c73620356685c70e1fd433" style="zoom:50%;" />
-
-上下左右滑动显示
-
-<img src="STM32F103 I2C OLED 显示实验 —— 汉字点阵、AHT20 温湿度与 U8g2 移植.assets/2c71b03314d410a3f1308174da631b11.jpg" alt="2c71b03314d410a3f1308174da631b11" style="zoom:50%;" />
-
-<img src="STM32F103 I2C OLED 显示实验 —— 汉字点阵、AHT20 温湿度与 U8g2 移植.assets/98b8d7d66234972cfba6708697023a12.jpg" alt="98b8d7d66234972cfba6708697023a12" style="zoom:50%;" />
-
-显示一个动态图案
-
-<img src="STM32F103 I2C OLED 显示实验 —— 汉字点阵、AHT20 温湿度与 U8g2 移植.assets/5f53f1081f23ad3d9871c8e063a6e2d0.jpg" alt="5f53f1081f23ad3d9871c8e063a6e2d0" style="zoom:50%;" />
+https://github.com/user-attachments/assets/6aec978b-1bcd-49d4-b565-03ca75aad233
 
 
 
@@ -623,7 +620,8 @@ U8G2的demo例程
 
 Keil 的 `Logic Analyzer` 不是测引脚电压，而是读某个寄存器的值随时间画波形。任务三的 SCL/SDA 由 I2C1 外设硬件驱动，CPU 没写过这两个 GPIO 的 ODR 位，所以 Logic Analyzer 里只会看到一条恒定直线，看不到 START、ACK 等任何内容；纯仿真环境下还会因为没有 I2C 从机而让 `HAL_I2C_Master_Transmit()` 卡到超时。波形只能在真实硬件上抓。
 
-![image-20261024180308260](STM32F103 I2C OLED 显示实验 —— 汉字点阵、AHT20 温湿度与 U8g2 移植.assets/image-20261024180308260.png)
+<img width="1238" height="340" alt="image-20261024180308260" src="https://github.com/user-attachments/assets/f2c1e87f-fcc9-4194-971b-f374e5b34a9b" />
+
 
 抓不到时的替代手段：
 
